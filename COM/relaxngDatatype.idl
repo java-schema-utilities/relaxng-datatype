@@ -1,0 +1,164 @@
+/*
+RELAX NG Datatype Interface COM Implementation
+==============================================
+	Copyright (c) 2001, Kohsuke Kawaguchi (kohsukekawaguchi@yahoo.com)
+	All rights reserved.
+
+	Redistribution and use in source and binary forms, with or without
+	modification, are permitted provided that the following conditions
+	are met:
+
+	* Redistributions of source code must retain the above copyright
+	  notice, this list of conditions and the following disclaimer.
+	* Redistributions in binary form must reproduce the above copyright
+	  notice, this list of conditions and the following disclaimer
+	  in the documentation and/or other materials provided with the
+	  distribution. 
+	* Neither the name of the author nor the names of its contributors
+	  may be used to endorse or promote products derived from this
+	  software without specific prior written permission. 
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+	"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+	LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+	FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS
+	OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+	SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+	LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+	DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+	THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+	TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+	THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+	DAMAGE.
+
+	$Id: relaxngDatatype.idl,v 1.1 2001/08/18 20:16:37 kkawa Exp $
+*/
+import "oaidl.idl";
+import "ocidl.idl";
+
+
+[
+	uuid(30D4E762-D077-4CDE-876D-82B2B02B7831),
+	version(1.0),
+	helpstring("relaxngDatatype 1.0 Type Library")
+]
+library RELAXNGDATATYPELib
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+	
+	interface IDatatypeBuilder;
+	interface IDatatype;
+	interface IValidationContext;
+	interface IDatatypeStreamingValidator;
+
+	[
+		object,
+		uuid(FA51426A-1CBC-43E7-82F6-9019A1ED07B9),
+		dual,
+		helpstring("IDatatypeLibrary Interface"),
+		pointer_default(unique)
+	]
+	interface IDatatypeLibrary : IDispatch
+	{
+		[id(1),helpstring("creates a new instance of DatatypeBuilder")]
+		HRESULT CreateDatatypeBuilder(
+			[in] BSTR LocalNameOfType, [out,retval] IDatatypeBuilder** ppRetVal );
+
+		[id(2), helpstring("gets or creates a pre-defined type")]
+		HRESULT CreateDatatype(
+			[in] BSTR LocalNameOfType, [out,retval] IDatatype** ppRetVal );
+	};
+
+	[
+		object,
+		uuid(1317C62B-5FAE-448b-B637-3E05F527A634),
+		dual,
+		helpstring("IDatatype"),
+		pointer_default(unique)
+	]
+	interface IDatatype : IDispatch
+	{
+		[id(1),helpstring("checks if the specified 'literal' matchs this Datatype under the current context.")]
+		HRESULT IsValid(
+			[in] BSTR literal, [in] IValidationContext* pContext, [out,retval] VARIANT_BOOL* pRetVal );
+
+		[id(2), helpstring("creates an instance of the streaming validator for this type")]
+		HRESULT CreateStreamingValidator(
+			[in] IValidationContext* pContext, [out,retval] IDatatypeStreamingValidator** ppRetVal );
+
+		[id(3), helpstring("converts lexcial value and the current context to the corresponding value object.")]
+		HRESULT CreateValue(
+			[in] BSTR literal, [in] IValidationContext* pContext, [out,retval] VARIANT* pRetVal );
+
+		[id(4), helpstring("tests the equality of two value objects which was originally created by the createValue method of this object.")]
+		HRESULT SameValue(
+			[in] VARIANT value1, [in] VARIANT value2, [out,retval] VARIANT_BOOL* pRetVal );
+
+		[id(5), helpstring("computes the hash code for a value object, which is consistent with the sameValue method.")]
+		HRESULT ValueHashCode(
+			[in] VARIANT obj, [out,retval] short* pRetVal );
+	};
+
+	[
+		object,
+		uuid(8E38266B-4D1D-4e2c-B210-82A8946B79CB),
+		dual,
+		helpstring("IDatatypeBuilder"),
+		pointer_default(unique)
+	]
+	interface IDatatypeBuilder : IDispatch
+	{
+		[id(1), helpstring("adds a new parameter")]
+		HRESULT AddParameter(
+			[in] BSTR name, [in] BSTR value, [in] IValidationContext* pContext );
+
+		[id(2), helpstring("derives a new Datatype from a Datatype by parameters that were already set through the addParameter method.")]
+		HRESULT CreateDatatype( [out,retval] IDatatype** ppRetVal );
+	}
+
+	[
+		object,
+		uuid(B176E9A9-505C-40a5-955E-3A9F8E53D3DA),
+		dual,
+		helpstring("IValidationContext"),
+		pointer_default(unique)
+	]
+	interface IValidationContext : IDispatch
+	{
+		[id(1), helpstring("resolves a namespace prefix to the corresponding namespace URI.")]
+		HRESULT ResolveNamespacePrefix(
+			[in] BSTR prefix, [out,retval] BSTR* pRetVal );
+
+		[id(2), helpstring("checks if an unparsed entity is declared with the specified name.")]
+		HRESULT IsUnparsedEntity( [in] BSTR entityName, [out,retval] VARIANT_BOOL* pRetVal );
+
+		[id(3), helpstring("checks if a notation is declared with the specified name.")]
+		HRESULT IsNotation( [in] BSTR notationName, [out,retval] VARIANT_BOOL* pRetVal );
+	}
+
+	[
+		object,
+		uuid(38F9252B-E79C-42f3-B588-B20EB4F72607),
+		dual,
+		helpstring("IDatatypeStreamingValidator"),
+		pointer_default(unique)
+	]
+	interface IDatatypeStreamingValidator : IDispatch
+	{
+		[id(1), helpstring("let a streaming validator process additional literal fragment.")]
+		HRESULT AddCharacters( [in] BSTR characters );
+		
+		[id(2), propget, helpstring("gets if the accumulated literal is valid with respect to the underlying Datatype.")]		
+		HRESULT IsValid( [out,retval] VARIANT_BOOL* pRetVal );
+	}
+
+	[
+		uuid(9A891E75-3AF0-408D-9D0E-84681DC64F56),
+		helpstring("BuiltinDatatypeLibrary Class")
+	]
+	coclass BuiltinDatatypeLibrary
+	{
+		[default] interface IDatatypeLibrary;
+	};
+};

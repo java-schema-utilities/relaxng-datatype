@@ -1,0 +1,26 @@
+HKCR
+{
+	RelaxngDatatype.BuiltinDatatypeLibrary.1 = s 'RELAX NG built-in DatatypeLibrary Class'
+	{
+		CLSID = s '{9A891E75-3AF0-408D-9D0E-84681DC64F56}'
+	}
+	RelaxngDatatype.BuiltinDatatypeLibrary = s 'RELAX NG built-in DatatypeLibrary Class'
+	{
+		CLSID = s '{9A891E75-3AF0-408D-9D0E-84681DC64F56}'
+		CurVer = s 'RelaxngDatatype.BuiltinDatatypeLibrary.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {9A891E75-3AF0-408D-9D0E-84681DC64F56} = s 'RELAX NG built-in DatatypeLibrary Class'
+		{
+			ProgID = s 'RelaxngDatatype.BuiltinDatatypeLibrary.1'
+			VersionIndependentProgID = s 'RelaxngDatatype.BuiltinDatatypeLibrary'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{30D4E762-D077-4CDE-876D-82B2B02B7831}'
+		}
+	}
+}
