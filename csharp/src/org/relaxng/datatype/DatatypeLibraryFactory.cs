@@ -24,3 +24,5 @@ public interface DatatypeLibraryFactory
 	 */
 	DatatypeLibrary CreateDatatypeLibrary( string namespaceURI );
 }
+
+}
