@@ -12,14 +12,14 @@ public class BuiltinDatatypeLibrary : DatatypeLibrary {
 	
 	public DatatypeBuilder CreateDatatypeBuilder( string name ) {
 		Datatype dt = CreateDatatype(name);
-		if(dt==null)	return null;
+		if(dt==null)	throw new DatatypeException();
 		return new DatatypeBuilderImpl(dt);
 	}
 	
 	public Datatype CreateDatatype( string name ) {
 		if(name=="string")	return StringType.theInstance;
 		if(name=="token")	return TokenType.theInstance;
-		return null;
+		throw new DatatypeException();
 	}
 }
 
@@ -58,7 +58,7 @@ public abstract class BuiltinType : Datatype {
 	}
 	
 	public bool SameValue( object value1, object value2 ) {
-		return value1==value2;
+		return value1.Equals(value2);
 	}
 	
 	public abstract object CreateValue( string literal, ValidationContext context );
