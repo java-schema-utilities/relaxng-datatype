@@ -1,13 +1,14 @@
-namespace Tenuto.Datatype {
+namespace org.relaxng.datatype.helpers {
 
 using org.relaxng.datatype;
+using System.Text;
 
-internal class DatatypeLibraryImpl : DatatypeLibrary {
+public class BuiltinDatatypeLibrary : DatatypeLibrary {
 	
-	internal static DatatypeLibraryImpl theInstance =
-		new DatatypeLibraryImpl();
+	public static BuiltinDatatypeLibrary theInstance =
+		new BuiltinDatatypeLibrary();
 	
-	private DatatypeLibraryImpl() {}
+	private BuiltinDatatypeLibrary() {}
 	
 	public DatatypeBuilder CreateDatatypeBuilder( string name ) {
 		Datatype dt = CreateDatatype(name);
@@ -31,7 +32,7 @@ internal class DatatypeBuilderImpl : DatatypeBuilder {
 	}
 	
 	public void AddParameter( string name, string value, ValidationContext context ) {
-		throw new DatatypeException("no parameter is allowed");
+		throw new DatatypeException();
 	}
 	
 	public Datatype CreateDatatype() {
@@ -39,7 +40,7 @@ internal class DatatypeBuilderImpl : DatatypeBuilder {
 	}
 }
 
-internal abstract class BuiltinType : Datatype {
+public abstract class BuiltinType : Datatype {
 	
 	public bool IsValid( string literal, ValidationContext context ) {
 		return true;
@@ -49,7 +50,7 @@ internal abstract class BuiltinType : Datatype {
 	}
 	
 	public DatatypeStreamingValidator CreateStreamingValidator( ValidationContext context ) {
-		return StreamingValidatorImpl.theInstance;
+		return AlwaysValidStreamingValidator.theInstance;
 	}
 	
 	public int ValueHashCode( object value ) {
@@ -61,11 +62,19 @@ internal abstract class BuiltinType : Datatype {
 	}
 	
 	public abstract object CreateValue( string literal, ValidationContext context );
+
+    public IDType IdType {
+        get { return IDType.ID_TYPE_NULL; }
+    }
+
+    public bool IsContextDependent {
+        get { return false; }
+    }
 }
 
-internal class StringType : BuiltinType {
+public class StringType : BuiltinType {
 	
-	internal static StringType theInstance = new StringType();
+	public static StringType theInstance = new StringType();
 	
 	private StringType(){}
 	
@@ -74,27 +83,48 @@ internal class StringType : BuiltinType {
 	}
 }
 
-internal class TokenType : BuiltinType {
+public class TokenType : BuiltinType {
 	
-	internal static TokenType theInstance = new TokenType();
+	public static TokenType theInstance = new TokenType();
 	
 	private TokenType(){}
 	
+	private static string collapse( string s ) {
+		StringBuilder buf = new StringBuilder();
+		bool inWhiteSpace = true;
+		
+		foreach( char c in s ) {
+			if( char.IsWhiteSpace(c) ) {
+				if(!inWhiteSpace)	buf.Append(' ');
+				inWhiteSpace = true;
+			} else {
+				buf.Append(c);
+				inWhiteSpace = false;
+			}
+		}
+		// remove trailing whitespace if any.
+		// (there must be at most one)
+		if(inWhiteSpace && buf.Length>0)	buf.Length--;
+		
+		return buf.ToString();
+	}
+	
 	public override object CreateValue( string literal, ValidationContext context ) {
-		return literal.Trim();
+		return collapse(literal);
 	}
 }
 
-internal class StreamingValidatorImpl : DatatypeStreamingValidator {
+
+internal class AlwaysValidStreamingValidator : DatatypeStreamingValidator {
 	
-	internal static StreamingValidatorImpl theInstance = new StreamingValidatorImpl();
+	internal static AlwaysValidStreamingValidator theInstance =
+		new AlwaysValidStreamingValidator();
 	
-	private StreamingValidatorImpl() {}
+	private AlwaysValidStreamingValidator() {}
 	
-	public void AddCharacters( char[] buf, int start, int len ) {}
+	public void AddCharacters( char[] chs, int start, int len ) {}
 	public bool IsValid() { return true; }
 	public void CheckValid() {}
 }
-
 
 }
